@@ -1,0 +1,10 @@
+Bug Report
+==========
+
+Error 1:
+  Class:
+  Method:
+  Test Method:
+  Message: 
+  Comments: 
+ 
