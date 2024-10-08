@@ -22,13 +22,13 @@ import java.util.ArrayList;
  */
 public class Cache {
 
-    private CacheItem[] data;
-    private int[] rank;
+    protected CacheItem[] data;
+    protected int[] rank;
 
-    private int size;
-    private int capacity;
+    protected int size;
+    protected int capacity;
 
-    String backingStore;
+    protected String backingStore;
 
     /**
      * Create a new Cache with a positive capacity and backing store
@@ -124,6 +124,23 @@ public class Cache {
         return new CacheResponse(retItem, true);
     }
 
+    public CacheResponse writeData(int key, int newData) throws NotFoundException {
+        int idx = findData(key);
+        boolean miss = false;
+        if (idx < 0) {
+            pushData(key, newData);
+            idx = installData(key, newData);
+            miss = true;
+        } else {
+            this.data[idx].setData(newData);
+        }
+
+        updateRanks(idx);
+        CacheResponse ret = new CacheResponse(this.data[idx].copy(), miss);
+        return ret;
+    }
+
+
     /**
      * Get the rank of the CacheItem with the specified key.
      * Rank encodes the relative access history of CacheItems.
@@ -149,7 +166,7 @@ public class Cache {
      * the item with the specified index was just accessed.
      * @param index the index of the CacheItem just accessed.
      */
-    private void updateRanks(int index) {
+    protected void updateRanks(int index) {
         rank[index] = 0;
 
         for (int i = 0; i < index; i++) {
@@ -178,6 +195,7 @@ public class Cache {
      */
     public int fetchData(int key) throws NotFoundException {
         int data = 0;
+
         boolean found = false;
         String cmpKey = Integer.toString(key);
 
@@ -205,8 +223,58 @@ public class Cache {
     }
 
     /**
+     * Write data to the backing store.
+     * Given integers of a key and newData, try to update
+     * the backing store by finding the key and changing
+     * the associated data to newData.
+     * The order of keys in the backing store does not change.
+     * If the key is not found in the backing store, throws
+     * a NotFoundException.
+     * @param key the key of the data item to update
+     * @param newData the new data to write
+     * @throws NotFoundException if the specified key is not found
+     */
+    public void pushData(int key, int newData) throws NotFoundException {
+        boolean found = false;
+        String cmpKey = Integer.toString(key);
+        StringBuilder sb = new StringBuilder();
+        try {
+            BufferedReader input = new BufferedReader(new FileReader(this.backingStore));
+            String line;
+            while ((line = input.readLine()) != null) {
+                String[] vals = line.split(" ");
+                if (vals.length == 2 && vals[0].equals(cmpKey)) {
+                    found = true;
+                    sb.append(vals[1]);
+                    sb.append(" ");
+                    sb.append(newData);
+                    sb.append("\n");
+                } else {
+                    sb.append(line);
+                    sb.append("\n");
+                }
+            }
+
+            input.close();
+
+            if (found) {
+                PrintWriter out = new PrintWriter(backingStore);
+                out.write(sb.toString());
+                out.close();
+            }
+
+        } catch (NumberFormatException | IOException nfe) {
+            found = false;
+        }
+
+        if (!found) {
+            throw new NotFoundException();
+        }
+    }
+
+    /**
      * Install the key-data pair into the cache as a CacheItem,
-     * evicting previously accessed cache items if necessary.
+     * evicting a previously accessed cache item if necessary.
      * Returns the index in which the CacheItem was stored.
      * If the cache is not full, the data is installed
      * in the smallest index which is empty.
@@ -217,7 +285,7 @@ public class Cache {
      * @param data the data to install in the cache.
      * @return the index in the cache where the CacheItem is installed.
      */
-    public int installData(int key, int data) {
+    protected int installData(int key, int data) {
         int insertIndex = -1;
         if (this.size >= this.capacity) {
             insertIndex = evictData(key);
@@ -245,7 +313,7 @@ public class Cache {
      * @param inKey the incoming key to be installed
      * @return the index in the cache from where to evict old data
      */
-    private int findEvictCandidate(int inKey) {
+    protected int findEvictCandidate(int inKey) {
         int max = -1;
         int maxIndex = -1;
 
@@ -261,7 +329,9 @@ public class Cache {
 
     /**
      * Evict data from the cache to make room for incoming data
-     * whose key and data are the arguments inKey and inData, respectively.
+     * whose key is the argument inKey.
+     * The data to be evicted is the item with highest rank,
+     * i.e. the cache item accessed furthest in the past.
      * Returns the index of the evicted data.
      * If the cache is not full or the incoming key is already in the cache,
      * no data is evicted and -1 is returned.

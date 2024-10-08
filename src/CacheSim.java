@@ -35,6 +35,17 @@ public class CacheSim {
     }
 
     /**
+     * Construct a new CacheSim using an existing cache.
+     * @param cache the existing cache
+     */
+    public CacheSim(Cache cache) {
+        this.cache = cache;
+        cacheMisses = 0;
+        responses = new ArrayList<>();
+        simRecord = new ArrayList<>();
+    }
+
+    /**
      * Simulate a sequence of cache requests given a
      * sequence of keys to request.
      * For each key in keys, starting at index 0,
@@ -49,6 +60,42 @@ public class CacheSim {
                 CacheResponse resp = cache.requestData(ref);
                 responses.add(resp);
 
+            } catch (NotFoundException nfe) {
+                simRecord.add("FAILURE");
+            }
+            simRecord.add(this.cacheToString());
+        }
+    }
+
+    /**
+     * Simulate a sequence of cache requests given a
+     * sequence of keys and data.
+     * For each index i from 0 to keys.size(), either request data or
+     * write data to the cache using keys[i] as the key.
+     * If data[i] is not null, write that data using keys[i] as the key.
+     * Otherwise, simply request the existing data.
+     * @param keys the sequence of keys
+     * @param data the sequence of data items to write
+     */
+    public void simulate(ArrayList<Integer> keys, ArrayList<Integer> data) {
+        if (keys == null || data == null || keys.size() != data.size()) {
+            return;
+        }
+
+        simRecord.add(this.cacheToString());
+        for (int i = 0; i < keys.size(); i++) {
+            if (keys.get(i) == null) {
+                continue;
+            }
+
+            CacheResponse resp = null;
+            try {
+                if (data.get(i) == null) {
+                    resp = cache.requestData(keys.get(i));
+                } else {
+                    resp = cache.writeData(keys.get(i), data.get(i));
+                }
+                responses.add(resp);
             } catch (NotFoundException nfe) {
                 simRecord.add("FAILURE");
             }
@@ -131,5 +178,6 @@ public class CacheSim {
         }
         return sb.toString();
     }
+
 
 }

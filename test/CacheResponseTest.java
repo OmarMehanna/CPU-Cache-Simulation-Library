@@ -3,7 +3,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CacheResponseTest {
 
-
     @Test
     void getMiss_False() {
         CacheResponse cr = new CacheResponse(new CacheItem(1,123), false);
@@ -30,8 +29,12 @@ class CacheResponseTest {
         assertFalse(cr.getMiss());
     }
 
-
     @Test
     void getData() {
+        CacheResponse cr = new CacheResponse(new CacheItem(1,123), true);
+        CacheItem test = new CacheItem(1,123);
+        CacheItem ci = cr.getData();
+        assertEquals(test.getKey(), ci.getKey(), "Keys do not match for a CacheItem in CacheResponse.");
+        assertEquals(test.getData(), ci.getData(), "Data does not match for a CacheItem in CacheResponse.");
     }
 }
