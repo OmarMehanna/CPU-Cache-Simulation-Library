@@ -124,6 +124,29 @@ public class Cache {
         return new CacheResponse(retItem, true);
     }
 
+    /**
+     * Write an updated data value for a particular key.
+     * If the given key is not already present in the cache,
+     * it first requests this key from the backing store
+     * and installs it in the cache.
+     * With the key in the cache, it then updates the associated
+     * data to equal newData locally within the cache
+     * and writes the updated value to the backing store.
+     * Writing data thus triggers a data access
+     * and affects rank.
+     *
+     * If the key exists in the backing store, returns it and the
+     * newly updated data associated with it wrapped as a CacheResponse.
+     * If not, a NotFoundException is thrown.
+     *
+     * @see Cache#getRank
+     * @see CacheResponse
+     *
+     * @param key the key whose data is to be updated
+     * @param newData the new data to write
+     * @return a CacheResponse with updated key-data pair
+     * @throws NotFoundException if the provided key does not exist in the backing store
+     */
     public CacheResponse writeData(int key, int newData) throws NotFoundException {
         int idx = findData(key);
         boolean miss = false;
@@ -146,6 +169,9 @@ public class Cache {
      * Rank encodes the relative access history of CacheItems.
      * A rank of 0 is the most recently accessed item,
      * with larger ranks encoding accesses further in the past.
+     * Data can be accessed by either a read (i.e. requestData())
+     * or a write (i.e. writeData())
+     *
      *
      * If the requested key does not exist in the cache,
      * return a special value of -1.
