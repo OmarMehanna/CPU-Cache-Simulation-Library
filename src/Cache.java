@@ -152,13 +152,12 @@ public class Cache {
         int idx = findData(key);
         boolean miss = false;
         if (idx < 0) {
-            pushData(key, newData);
-            idx = installData(key, newData);
+            int data = fetchData(key);
+            idx = installData(key, data);
             miss = true;
-        } else {
-            pushData(key, newData);
-            this.data[idx].setData(newData);
         }
+        pushData(key, newData);
+        this.data[idx].setData(newData);
 
         updateRanks(idx);
         CacheResponse ret = new CacheResponse(this.data[idx].copy(), miss);
