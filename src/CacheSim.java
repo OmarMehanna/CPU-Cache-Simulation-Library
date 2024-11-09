@@ -96,10 +96,10 @@ public class CacheSim {
                     resp = cache.writeData(keys.get(i), data.get(i));
                 }
                 responses.add(resp);
+                simRecord.add(this.cacheToString());
             } catch (NotFoundException nfe) {
                 simRecord.add("FAILURE");
             }
-            simRecord.add(this.cacheToString());
         }
     }
 
