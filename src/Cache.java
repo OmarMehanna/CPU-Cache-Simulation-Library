@@ -120,8 +120,9 @@ public class Cache {
             return ret;
         }
 
+        updateRanks(foundIndex);
         CacheItem retItem = data[foundIndex].copy();
-        return new CacheResponse(retItem, true);
+        return new CacheResponse(retItem, false);
     }
 
     /**
@@ -155,6 +156,7 @@ public class Cache {
             idx = installData(key, newData);
             miss = true;
         } else {
+            pushData(key, newData);
             this.data[idx].setData(newData);
         }
 
@@ -227,7 +229,7 @@ public class Cache {
 
         try {
             BufferedReader input = new BufferedReader(new FileReader(this.backingStore));
-            String line = input.readLine();
+            String line;
             while (!found && (line = input.readLine()) != null) {
                 String[] vals = line.split(" ");
                 if (vals.length == 2 && vals[0].equals(cmpKey)) {
@@ -271,7 +273,7 @@ public class Cache {
                 String[] vals = line.split(" ");
                 if (vals.length == 2 && vals[0].equals(cmpKey)) {
                     found = true;
-                    sb.append(vals[1]);
+                    sb.append(vals[0]);
                     sb.append(" ");
                     sb.append(newData);
                     sb.append("\n");
@@ -366,6 +368,9 @@ public class Cache {
      * @return the index where data was evicted or -1
      */
     public int evictData(int inKey) {
+        if (size < capacity) {
+            return -1;
+        }
         int index = findData(inKey);
         if (index > 0) {
             return -1;

@@ -111,6 +111,7 @@ public class CacheSim {
         simRecord.clear();
         cacheMisses = 0;
         responses.clear();
+        cache.reset();
     }
 
     /**
@@ -168,7 +169,7 @@ public class CacheSim {
             if (ci == null) {
                 item = "()";
             } else {
-                item = String.format("(%d,%d)", ci.getKey(), ci.getKey());
+                item = String.format("(%d,%d)", ci.getKey(), ci.getData());
             }
 
             sb.append(item);
