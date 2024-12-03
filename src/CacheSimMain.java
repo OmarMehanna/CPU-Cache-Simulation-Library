@@ -60,6 +60,9 @@ public class CacheSimMain {
 
             PrintWriter pw = new PrintWriter(outputFile);
             pw.println("Cache Misses: " + Integer.toString(sim.getCacheMisses()));
+
+            pw.println("Total Time: " + sim.getTotalSimulationTime());
+
             ArrayList<String> history = sim.getCacheHistory();
             for (String h : history) {
                 pw.println(h);

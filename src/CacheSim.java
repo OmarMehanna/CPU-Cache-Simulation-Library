@@ -128,6 +128,18 @@ public class CacheSim {
         }
         return misses;
     }
+    /**
+     * Get the total time taken for the simulation.
+     * The total time is the sum of the time taken for each cache response.
+     * @return the total time taken for the simulation
+     */
+    public double getTotalSimulationTime() {
+        double totalTime = 0.0;
+        for (CacheResponse resp : responses) {
+            totalTime += resp.getTime();
+        }
+        return totalTime;
+    }
 
     /**
      * Get a record of the simulation's history as
