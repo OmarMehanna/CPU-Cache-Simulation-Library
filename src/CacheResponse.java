@@ -6,16 +6,29 @@ public class CacheResponse {
 
     private CacheItem data;
     private boolean miss;
+    private double time;
 
     /**
      * Construct a new CacheResponse object
      * @param data the CacheItem requested
      * @param miss boolean whether the requested caused a cache miss
      */
-    public CacheResponse(CacheItem data, boolean miss) {
+    public CacheResponse(CacheItem data, boolean miss, double time) {
         this.data = data;
         this.miss = miss;
+        this.time = time;
     }
+
+
+
+    public double getTime() {
+        return time;
+    }
+
+    public void setTime(double time) {
+        this.time = time;
+    }
+
 
     /**
      * Set boolean for cache miss on this CacheResponse.

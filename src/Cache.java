@@ -28,7 +28,7 @@ public class Cache {
     protected int size;
     protected int capacity;
 
-    protected String backingStore;
+    protected BackingStore backingStore;
 
     /**
      * Create a new Cache with a positive capacity and backing store
@@ -45,7 +45,7 @@ public class Cache {
         size = 0;
         this.capacity = capacity;
         rank = new int[capacity];
-        backingStore = filePath;
+        this.backingStore = new BackingStore(filePath);
     }
 
     /**
@@ -112,7 +112,7 @@ public class Cache {
     public CacheResponse requestData(int key) throws NotFoundException {
         int foundIndex = findData(key);
         if (foundIndex < 0) {
-            int val = fetchData(key);
+            int val = backingStore.fetchData(key);
             installData(key, val);
             //use a recursive call to find the data after installation
             CacheResponse ret = requestData(key);
@@ -152,11 +152,11 @@ public class Cache {
         int idx = findData(key);
         boolean miss = false;
         if (idx < 0) {
-            int data = fetchData(key);
+            int data = backingStore.fetchData(key);
             idx = installData(key, data);
             miss = true;
         }
-        pushData(key, newData);
+        backingStore.pushData(key, newData);
         this.data[idx].setData(newData);
 
         updateRanks(idx);
@@ -209,95 +209,95 @@ public class Cache {
 
     }
 
-    /**
-     * Fetch data from the backing store given the associated key.
-     * This method only fetches the data and returns it;
-     * it does not interact with the cache at all.
-     * If the key is not found in the backing store, throw
-     * a NotFoundException.
-     *
-     * @param key the key of the requested data item
-     * @return the data from the backing store with requested key if found
-     * @throws NotFoundException if the requested key is not found
-     */
-    public int fetchData(int key) throws NotFoundException {
-        int data = 0;
+//    /**
+//     * Fetch data from the backing store given the associated key.
+//     * This method only fetches the data and returns it;
+//     * it does not interact with the cache at all.
+//     * If the key is not found in the backing store, throw
+//     * a NotFoundException.
+//     *
+//     * @param key the key of the requested data item
+//     * @return the data from the backing store with requested key if found
+//     * @throws NotFoundException if the requested key is not found
+//     */
+//    public int fetchData(int key) throws NotFoundException {
+//        int data = 0;
+//
+//        boolean found = false;
+//        String cmpKey = Integer.toString(key);
+//
+//        try {
+//            BufferedReader input = new BufferedReader(new FileReader(this.backingStore));
+//            String line;
+//            while (!found && (line = input.readLine()) != null) {
+//                String[] vals = line.split(" ");
+//                if (vals.length == 2 && vals[0].equals(cmpKey)) {
+//                    data = Integer.parseInt(vals[1]);
+//                    found = true;
+//                }
+//            }
+//
+//            input.close();
+//
+//        } catch (NumberFormatException | IOException nfe) {
+//            found = false;
+//        }
+//
+//        if (!found) {
+//            throw new NotFoundException();
+//        }
+//        return data;
+//    }
 
-        boolean found = false;
-        String cmpKey = Integer.toString(key);
-
-        try {
-            BufferedReader input = new BufferedReader(new FileReader(this.backingStore));
-            String line;
-            while (!found && (line = input.readLine()) != null) {
-                String[] vals = line.split(" ");
-                if (vals.length == 2 && vals[0].equals(cmpKey)) {
-                    data = Integer.parseInt(vals[1]);
-                    found = true;
-                }
-            }
-
-            input.close();
-
-        } catch (NumberFormatException | IOException nfe) {
-            found = false;
-        }
-
-        if (!found) {
-            throw new NotFoundException();
-        }
-        return data;
-    }
-
-    /**
-     * Write data to the backing store.
-     * Given integers of a key and newData, try to update
-     * the backing store by finding the key and changing
-     * the associated data to newData.
-     * The order of keys in the backing store does not change.
-     * If the key is not found in the backing store, throws
-     * a NotFoundException.
-     * @param key the key of the data item to update
-     * @param newData the new data to write
-     * @throws NotFoundException if the specified key is not found
-     */
-    public void pushData(int key, int newData) throws NotFoundException {
-        boolean found = false;
-        String cmpKey = Integer.toString(key);
-        StringBuilder sb = new StringBuilder();
-        try {
-            BufferedReader input = new BufferedReader(new FileReader(this.backingStore));
-            String line;
-            while ((line = input.readLine()) != null) {
-                String[] vals = line.split(" ");
-                if (vals.length == 2 && vals[0].equals(cmpKey)) {
-                    found = true;
-                    sb.append(vals[0]);
-                    sb.append(" ");
-                    sb.append(newData);
-                    sb.append("\n");
-                } else {
-                    sb.append(line);
-                    sb.append("\n");
-                }
-            }
-
-            input.close();
-
-            if (found) {
-                PrintWriter out = new PrintWriter(backingStore);
-                out.write(sb.toString());
-                out.close();
-            }
-
-        } catch (NumberFormatException | IOException nfe) {
-            found = false;
-        }
-
-        if (!found) {
-            throw new NotFoundException();
-        }
-    }
+//    /**
+//     * Write data to the backing store.
+//     * Given integers of a key and newData, try to update
+//     * the backing store by finding the key and changing
+//     * the associated data to newData.
+//     * The order of keys in the backing store does not change.
+//     * If the key is not found in the backing store, throws
+//     * a NotFoundException.
+//     * @param key the key of the data item to update
+//     * @param newData the new data to write
+//     * @throws NotFoundException if the specified key is not found
+//     */
+//    public void pushData(int key, int newData) throws NotFoundException {
+//        boolean found = false;
+//        String cmpKey = Integer.toString(key);
+//        StringBuilder sb = new StringBuilder();
+//        try {
+//            BufferedReader input = new BufferedReader(new FileReader(this.backingStore));
+//            String line;
+//            while ((line = input.readLine()) != null) {
+//                String[] vals = line.split(" ");
+//                if (vals.length == 2 && vals[0].equals(cmpKey)) {
+//                    found = true;
+//                    sb.append(vals[0]);
+//                    sb.append(" ");
+//                    sb.append(newData);
+//                    sb.append("\n");
+//                } else {
+//                    sb.append(line);
+//                    sb.append("\n");
+//                }
+//            }
+//
+//            input.close();
+//
+//            if (found) {
+//                PrintWriter out = new PrintWriter(backingStore);
+//                out.write(sb.toString());
+//                out.close();
+//            }
+//
+//        } catch (NumberFormatException | IOException nfe) {
+//            found = false;
+//        }
+//
+//        if (!found) {
+//            throw new NotFoundException();
+//        }
+//    }
 
     /**
      * Install the key-data pair into the cache as a CacheItem,
