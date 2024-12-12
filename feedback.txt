@@ -1,0 +1,11 @@
+Git Usage (/8): 3
+F1 Impl. (/16): 8.0
+F1 Testing (/12): 0.0
+F2 Impl. (/12): 0.0
+F2 Testing (/12): 0
+UML (/8): 0.0
+Code Clarity (/4): 4
+Documentation (/8): 6
+Grade: 21.0
+Comments: Not Done
+Marker: Saurabh, saurabh@dal.ca
